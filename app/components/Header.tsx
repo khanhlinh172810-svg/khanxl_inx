@@ -10,7 +10,7 @@ import {
   Repeat,
   Phone,
 } from "lucide-react";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { SearchContext } from "./searchContext";
 
@@ -29,34 +29,55 @@ export default function Header() {
   const { keyword, setKeyword } = useContext(SearchContext);
   const router = useRouter();
 
+  // Bọc hàm kiểm tra vào useCallback để tối ưu hóa hiệu năng
+  // 👉 TRONG FILE Header.tsx (FRONTEND)
+  const checkLoginStatus = useCallback(async () => {
+    const token = localStorage.getItem("smarthub_token");
+
+    if (!token) {
+      setIsLoggedIn(false);
+      setUserRole(null);
+      return;
+    }
+
+    try {
+      // 💥 SỬA ĐƯỜNG DẪN TẠI ĐÂY: Thay đổi từ /api/users/userinfo thành /api/auth/me
+      const res = await fetch("http://localhost:5000/api/auth/me", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setIsLoggedIn(true);
+        // Vì hàm getMe của bạn trả về object dạng { user: { ... } }
+        // nên ta sẽ bóc tách dữ liệu theo cấu trúc data.user
+        setUserRole(data?.user?.role ?? null);
+      } else if (res.status === 401) {
+        console.warn("Token không hợp lệ. Đang dọn dẹp...");
+        localStorage.removeItem("smarthub_token");
+        setIsLoggedIn(false);
+        setUserRole(null);
+      }
+    } catch (error) {
+      console.error("Lỗi kết nối API tại Header:", error);
+    }
+  }, []);
+
   useEffect(() => {
-    const checkLoginStatus = async () => {
-      const token = localStorage.getItem("token");
-      setIsLoggedIn(!!token);
-      if (!token) {
-        setUserRole(null);
-        return;
-      }
-      try {
-        const res = await fetch("http://localhost:3000/users/userinfo", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setUserRole(data?.role ?? null);
-        }
-      } catch {
-        setUserRole(null);
-      }
-    };
+    // Chạy kiểm tra ngay khi mount component
     checkLoginStatus();
-    window.addEventListener("focus", checkLoginStatus);
+
+    // Đồng bộ hóa khi tab trình duyệt thay đổi dữ liệu (ví dụ: login từ tab khác)
     window.addEventListener("storage", checkLoginStatus);
+
     return () => {
-      window.removeEventListener("focus", checkLoginStatus);
       window.removeEventListener("storage", checkLoginStatus);
     };
-  }, []);
+  }, [checkLoginStatus]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setKeyword(e.target.value);
@@ -187,12 +208,14 @@ export default function Header() {
                     <Link
                       href="/nguoidung"
                       className="block px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                      onClick={() => setShowUserMenu(false)}
                     >
                       Thông tin cá nhân
                     </Link>
                     <Link
                       href="/donhang"
                       className="block px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                      onClick={() => setShowUserMenu(false)}
                     >
                       Đơn hàng của tôi
                     </Link>
@@ -200,6 +223,7 @@ export default function Header() {
                       <Link
                         href="/admin/product"
                         className="block px-4 py-2.5 text-sm text-amber-500 font-medium hover:bg-amber-50 transition-colors"
+                        onClick={() => setShowUserMenu(false)}
                       >
                         Trang quản trị
                       </Link>
@@ -207,7 +231,8 @@ export default function Header() {
                     <div className="border-t border-gray-100 my-1" />
                     <button
                       onClick={() => {
-                        localStorage.removeItem("token");
+                        localStorage.removeItem("smarthub_token");
+                        localStorage.removeItem("smarthub_username");
                         document.cookie = "token=; path=/; max-age=0";
                         setIsLoggedIn(false);
                         setUserRole(null);
@@ -271,17 +296,34 @@ export default function Header() {
             <Link
               href="/giohang"
               className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm hover:bg-gray-50 transition-colors"
+              onClick={() => setIsOpen(false)}
             >
               <ShoppingCart className="w-5 h-5" />
               Giỏ hàng {cartCount > 0 && `(${cartCount})`}
             </Link>
-            <Link
-              href="/dangnhap"
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-sm transition-colors"
-            >
-              <User className="w-5 h-5" />
-              Đăng nhập
-            </Link>
+            {isLoggedIn ? (
+              <button
+                onClick={() => {
+                  localStorage.removeItem("smarthub_token");
+                  localStorage.removeItem("smarthub_username");
+                  setIsLoggedIn(false);
+                  setUserRole(null);
+                  setIsOpen(false);
+                }}
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gray-200 text-gray-700 font-semibold text-sm transition-colors"
+              >
+                Đăng xuất
+              </button>
+            ) : (
+              <Link
+                href="/dangnhap"
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-sm transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                <User className="w-5 h-5" />
+                Đăng nhập
+              </Link>
+            )}
           </div>
         </div>
       )}

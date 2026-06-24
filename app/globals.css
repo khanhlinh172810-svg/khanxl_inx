@@ -19,7 +19,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #ededed;
+    --background: #0a0a0a;
     --foreground: #ededed;
   }
 }
@@ -31,12 +31,8 @@ body {
 }
 
 @keyframes ticker {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 .animate-ticker {
@@ -44,54 +40,21 @@ body {
 }
 
 /* Theme overrides for previously used amber utilities to a calmer teal/sky tone */
-.text-amber-200 {
-  color: var(--accent-300) !important;
-}
-.text-amber-400 {
-  color: var(--accent-400) !important;
-}
-.text-amber-500 {
-  color: var(--accent-500) !important;
-}
-.text-amber-600 {
-  color: var(--accent-600) !important;
-}
-.bg-amber-50 {
-  background-color: var(--accent-50) !important;
-}
-.bg-amber-400 {
-  background-color: var(--accent-400) !important;
-}
-.bg-amber-300 {
-  background-color: var(--accent-300) !important;
-}
-.bg-amber-500 {
-  background-color: var(--accent-500) !important;
-}
-.border-amber-500 {
-  border-color: var(--accent-500) !important;
-}
-.border-amber-200 {
-  border-color: color-mix(
-    in srgb,
-    var(--accent-400) 60%,
-    #ffffff 40%
-  ) !important;
-}
-.shadow-amber-500\/25 {
-  box-shadow: 0 40px 120px rgba(14, 165, 164, 0.12) !important;
-}
-.shadow-amber-500\/20 {
-  box-shadow: 0 10px 30px rgba(14, 165, 164, 0.08) !important;
-}
-.hover\:bg-amber-50:hover {
-  background-color: var(--accent-50) !important;
-}
+.text-amber-200 { color: var(--accent-300) !important; }
+.text-amber-400 { color: var(--accent-400) !important; }
+.text-amber-500 { color: var(--accent-500) !important; }
+.text-amber-600 { color: var(--accent-600) !important; }
+.bg-amber-50 { background-color: var(--accent-50) !important; }
+.bg-amber-400 { background-color: var(--accent-400) !important; }
+.bg-amber-300 { background-color: var(--accent-300) !important; }
+.bg-amber-500 { background-color: var(--accent-500) !important; }
+.border-amber-500 { border-color: var(--accent-500) !important; }
+.border-amber-200 { border-color: color-mix(in srgb, var(--accent-400) 60%, #ffffff 40%) !important; }
+.shadow-amber-500\/25 { box-shadow: 0 40px 120px rgba(14,165,164,0.12) !important; }
+.shadow-amber-500\/20 { box-shadow: 0 10px 30px rgba(14,165,164,0.08) !important; }
+.hover\:bg-amber-50:hover { background-color: var(--accent-50) !important; }
 
 /* Small helpers used in header/footer */
-.text-amber-400\/70 {
-  color: rgba(56, 189, 248, 0.7) !important;
-}
-.text-amber-400\/60 {
-  color: rgba(56, 189, 248, 0.6) !important;
-}
+.text-amber-400\/70 { color: rgba(56,189,248,0.7) !important; }
+.text-amber-400\/60 { color: rgba(56,189,248,0.6) !important; }
+
